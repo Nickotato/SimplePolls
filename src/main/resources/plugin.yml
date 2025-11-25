@@ -7,3 +7,7 @@ commands:
     usage: /poll
     permission: ""
     description: "Open the Simple Polls GUI"
+permissions:
+  polls.manage:
+    description: Allows a player to manage and create polls
+    default: op
