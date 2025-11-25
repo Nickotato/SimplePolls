@@ -72,5 +72,7 @@ class ManagePollsGui: Gui(Component.text("§6Managing Polls"),54) {
         val pdc = meta.persistentDataContainer
         val pollId = pdc.get(SimplePolls.POLL_KEY, PersistentDataType.INTEGER) ?: return
         val poll = PollsManager.polls.find { it.id == pollId } ?: return
+
+        GuiManager.open(ManagePollGui(poll), player)
     }
 }

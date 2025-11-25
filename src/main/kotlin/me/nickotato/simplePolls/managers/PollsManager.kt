@@ -11,7 +11,16 @@ import java.time.LocalDateTime
 object PollsManager {
     val polls = PollDataStorage.loadAllPolls()   //mutableListOf<Poll>()
     val expiredPolls = PollDataStorage.loadAllPolls(true)   //mutableListOf<Poll>()
-    private var nextId = 0
+
+    private var nextId = 1
+
+    init {
+        val highestActive = polls.maxOfOrNull { it.id } ?: 0
+        val highestExpired = expiredPolls.maxOfOrNull { it.id } ?: 0
+
+        nextId = maxOf(highestActive, highestExpired) + 1
+    }
+
 
     fun createPoll(question: String, options: List<String>, durationHours: Long) {
         val endsAt = durationHours.let { LocalDateTime.now().plusSeconds(durationHours) } // CHANGE BACK TO PLUS HOURS
