@@ -1,0 +1,9 @@
+name: SimplePolls
+version: '1.0-SNAPSHOT'
+main: me.nickotato.simplePolls.SimplePolls
+api-version: '1.21'
+commands:
+  poll:
+    usage: /poll
+    permission: ""
+    description: "Open the Simple Polls GUI"
