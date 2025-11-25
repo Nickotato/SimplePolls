@@ -1,7 +1,9 @@
 package me.nickotato.simplePolls
 
 import me.nickotato.simplePolls.commands.PollCommand
+import me.nickotato.simplePolls.listeners.PollChatListener
 import me.nickotato.simplePolls.managers.GuiManager
+import me.nickotato.simplePolls.managers.PollsManager
 import org.bukkit.plugin.java.JavaPlugin
 
 class SimplePolls : JavaPlugin() {
@@ -15,7 +17,10 @@ class SimplePolls : JavaPlugin() {
         instance = this
 
         server.pluginManager.registerEvents(GuiManager, this)
+        server.pluginManager.registerEvents(PollChatListener, this)
 
         getCommand("poll")?.setExecutor(PollCommand())
+
+        PollsManager.beginRunningPerSecond()
     }
 }

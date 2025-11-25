@@ -1,5 +1,6 @@
 package me.nickotato.simplePolls.guis
 
+import me.nickotato.simplePolls.managers.GuiManager
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -14,7 +15,7 @@ class MainPollGui(player: Player): Gui(Component.text("§6Polls Menu"), 27) {
         view.itemMeta = viewMeta
         setItem(11,view)
 
-        val manage = ItemStack(Material.WRITABLE_BOOK, 1)
+        val manage = ItemStack(Material.WRITTEN_BOOK, 1)
         val manageMeta = manage.itemMeta
         manageMeta.displayName(Component.text("§2Manage Polls"))
         if (!player.hasPermission("polls.manage")) {
@@ -32,7 +33,12 @@ class MainPollGui(player: Player): Gui(Component.text("§6Polls Menu"), 27) {
 
         when (slot) {
             15 -> {
+                if (!player.hasPermission("polls.manage")) {
+                    player.sendMessage("§cYou don't have permission to manage polls")
+                    return
+                }
 
+                GuiManager.open(ManagePollsGui(), player)
             }
         }
     }
