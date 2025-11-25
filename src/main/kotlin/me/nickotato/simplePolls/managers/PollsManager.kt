@@ -2,6 +2,7 @@ package me.nickotato.simplePolls.managers
 
 import me.nickotato.simplePolls.SimplePolls
 import me.nickotato.simplePolls.model.Poll
+import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import java.time.LocalDateTime
 
@@ -39,5 +40,27 @@ object PollsManager {
                 polls.remove(poll)
             }
         }
+    }
+
+    fun setPlayersAnswer(poll: Poll, player: Player, choice: String) {
+        poll.votes[player.uniqueId.toString()] = choice
+        calculateOptionsVotes(poll)
+    }
+
+    private fun calculateOptionsVotes(poll: Poll) {
+        for (option in poll.options.keys) {
+            poll.options[option] = 0
+        }
+
+        for ((_, votedOption) in poll.votes) {
+            poll.options[votedOption] = poll.options.getOrDefault(votedOption, 0) + 1
+        }
+    }
+
+    fun getOptionWithMostVotes(poll: Poll): String {
+        if (poll.options.isEmpty()) return "None"
+
+        val top = poll.options.maxByOrNull { it.value } ?: return "None"
+        return top.key
     }
 }

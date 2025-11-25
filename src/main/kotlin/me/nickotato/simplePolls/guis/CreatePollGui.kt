@@ -3,14 +3,16 @@ package me.nickotato.simplePolls.guis
 import me.nickotato.simplePolls.SimplePolls
 import me.nickotato.simplePolls.listeners.PollChatListener
 import me.nickotato.simplePolls.managers.GuiManager
+import me.nickotato.simplePolls.managers.PollsManager
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 
-class CreatePollGui:Gui(Component.text("§2Creating Poll"),3 * 9) {
+class CreatePollGui:Gui(Component.text("§2Creating Poll"),4 * 9) {
     private val gui = this
     private var name = "Undefined"
     private val options = mutableListOf<String>()
@@ -20,6 +22,18 @@ class CreatePollGui:Gui(Component.text("§2Creating Poll"),3 * 9) {
         updateNameItem()
         updateDurationItem()
         updateOptionsItem()
+
+        val create = ItemStack(Material.LIME_DYE)
+        val createMeta = create.itemMeta
+        createMeta.displayName(Component.text("§2Create Poll"))
+        create.itemMeta = createMeta
+        setItem(32, create)
+
+        val cancel = ItemStack(Material.RED_DYE)
+        val cancelMeta = cancel.itemMeta
+        cancelMeta.displayName(Component.text("§cCancel"))
+        cancel.itemMeta = cancelMeta
+        setItem(30, cancel)
     }
 
     private fun updateNameItem() {
@@ -95,6 +109,16 @@ class CreatePollGui:Gui(Component.text("§2Creating Poll"),3 * 9) {
                     })
                 }
 
+            }
+            30 -> {
+                player.closeInventory()
+                player.playSound(player.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
+            }
+            32 -> {
+                player.closeInventory()
+                player.sendMessage("§aPoll Created")
+                PollsManager.createPoll(name, options, duration)
+                player.playSound(player.location, Sound.ENTITY_VILLAGER_YES, 1f, 1f)
             }
         }
     }

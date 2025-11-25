@@ -40,6 +40,9 @@ class MainPollGui(player: Player): Gui(Component.text("§6Polls Menu"), 27) {
 
                 GuiManager.open(ManagePollsGui(), player)
             }
+            11 -> {
+                GuiManager.open(ViewPollsGui(player), player)
+            }
         }
     }
 }
