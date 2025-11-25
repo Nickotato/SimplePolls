@@ -64,6 +64,15 @@ class ViewPollsGui(player: Player): Gui(Component.text("§6Viewing Polls"),54) {
         if (player !is Player) return
         val item = event.currentItem ?: return
         val meta = item.itemMeta ?: return
+        val slot = event.slot
+
+        when (slot) {
+            50 -> {
+                GuiManager.open(ViewExpiredPollsGui(), player)
+                return
+            }
+        }
+
         val pdc = meta.persistentDataContainer
         val pollId = pdc.get(SimplePolls.POLL_KEY, PersistentDataType.INTEGER) ?: return
         val poll = PollsManager.polls.find { it.id == pollId } ?: return

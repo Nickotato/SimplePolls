@@ -26,6 +26,10 @@ class SimplePolls : JavaPlugin() {
 
         getCommand("poll")?.setExecutor(PollCommand())
 
-        PollsManager.beginRunningPerSecond()
+        PollsManager.beginRepeatingTasks()
+    }
+
+    override fun onDisable() {
+        PollsManager.save()
     }
 }

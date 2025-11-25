@@ -1,18 +1,20 @@
 package me.nickotato.simplePolls.managers
 
 import me.nickotato.simplePolls.SimplePolls
+import me.nickotato.simplePolls.data.PollDataStorage
 import me.nickotato.simplePolls.model.Poll
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
+import java.io.File
 import java.time.LocalDateTime
 
 object PollsManager {
-    val polls = mutableListOf<Poll>()
-    val expiredPolls = mutableListOf<Poll>()
+    val polls = PollDataStorage.loadAllPolls()   //mutableListOf<Poll>()
+    val expiredPolls = PollDataStorage.loadAllPolls(true)   //mutableListOf<Poll>()
     private var nextId = 0
 
     fun createPoll(question: String, options: List<String>, durationHours: Long) {
-        val endsAt = durationHours.let { LocalDateTime.now().plusHours(durationHours) }
+        val endsAt = durationHours.let { LocalDateTime.now().plusSeconds(durationHours) } // CHANGE BACK TO PLUS HOURS
 
         val poll = Poll(
             id = nextId++,
@@ -24,23 +26,40 @@ object PollsManager {
         polls.add(poll)
     }
 
-    fun beginRunningPerSecond() {
+    fun beginRepeatingTasks() {
         object : BukkitRunnable() {
             override fun run() {
                 checkIfPollsExpired()
             }
         }.runTaskTimer(SimplePolls.instance, 0L, 20L)
+
+        object : BukkitRunnable() {
+            override fun run() {
+                save()
+            }
+        }.runTaskTimer(SimplePolls.instance, 0L, 20 * 20)
     }
 
     private fun checkIfPollsExpired() {
         val now = LocalDateTime.now()
-        for (poll in polls) {
+
+        val iterator = polls.iterator()
+
+        while (iterator.hasNext()) {
+            val poll = iterator.next()
+
             if (poll.endsAt.isBefore(now)) {
+
                 expiredPolls.add(poll)
-                polls.remove(poll)
+
+                iterator.remove()
+
+                val file = File(SimplePolls.instance.dataFolder, "polldata/${poll.id}.yml")
+                if (file.exists()) file.delete()
             }
         }
     }
+
 
     fun setPlayersAnswer(poll: Poll, player: Player, choice: String) {
         poll.votes[player.uniqueId.toString()] = choice
@@ -62,5 +81,10 @@ object PollsManager {
 
         val top = poll.options.maxByOrNull { it.value } ?: return "None"
         return top.key
+    }
+
+    fun save() {
+        PollDataStorage.saveAllPolls(false, polls)
+        PollDataStorage.saveAllPolls(true, expiredPolls)
     }
 }
