@@ -69,9 +69,14 @@ class ViewPollsGui(private val viewer: Player): Gui(Component.text("§8Viewing P
             lore.add(Component.text("§cExpired"))
         }
 
-        if (poll.votes.contains(player.uniqueId.toString())) {
+//        if (poll.votes.contains(player.uniqueId.toString())) {
+//            lore.add(Component.text("§aAlready Voted"))
+//        }
+
+        if (poll.votedPlayers.contains(player.uniqueId.toString())) {
             lore.add(Component.text("§aAlready Voted"))
         }
+
         return lore
     }
 

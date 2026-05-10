@@ -22,13 +22,14 @@
 4. Ensure you have the correct Minecraft version (`1.21.4+` recommended).
 
 ## Commands
-| Command      | Description                   
-|-------------|-------------------------------
-| `/poll`      | Open the Simple Polls GUI       
-| `/polls`     | Alias for `/poll`               
+| Command  | Description               |
+|----------|---------------------------|
+| `/poll`  | Open the Simple Polls GUI |
+| `/polls` | Alias for `/poll`         |
 
 ## Permissions
 - `polls.manage` – Allows a player to create and manage polls. Default: OP.
+- `polls.config` – Allows a player to edit configuration. Default: OP.
 
 ## Usage
 1. Open the polls GUI with `/poll` or `/polls`.

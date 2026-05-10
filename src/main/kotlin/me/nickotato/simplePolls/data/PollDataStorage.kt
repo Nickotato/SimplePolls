@@ -25,9 +25,15 @@ object PollDataStorage {
         config.set("id", poll.id.toString())
         config.set("question", poll.question)
         config.createSection("options", poll.options)
-        config.createSection("votes", poll.votes)
+//        config.createSection("votes", poll.votes)
         config.set("createdAt", poll.createdAt.toString())
         config.set("endsAt", poll.endsAt.toString())
+        config.set("anonymous", poll.anonymous)
+        config.set("votedPlayers", poll.votedPlayers.toList())
+
+        if (!poll.anonymous) {
+            config.createSection("votes", poll.votes)
+        }
 
         config.save(file)
     }
@@ -67,12 +73,20 @@ object PollDataStorage {
         val createdAt = LocalDateTime.parse(createdAtStr)
         val endsAt = LocalDateTime.parse(endsAtStr)
 
+        val anonymous = config.getBoolean("anonymous", false)
+
+        val votedPlayers =
+            config.getStringList("votedPlayers").toMutableSet()
+
+
 
         return Poll(
             id = id,
             question = question,
             options = options,
             votes = votes,
+            votedPlayers = votedPlayers,
+            anonymous = anonymous,
             createdAt = createdAt,
             endsAt = endsAt
         )

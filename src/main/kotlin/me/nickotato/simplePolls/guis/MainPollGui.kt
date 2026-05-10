@@ -15,6 +15,15 @@ class MainPollGui(player: Player): Gui(Component.text("§8Polls Menu"), 27) {
         view.itemMeta = viewMeta
         setItem(11,view)
 
+        val config = ItemStack(Material.COMPARATOR, 1)
+        val configMeta = config.itemMeta
+        configMeta.displayName(Component.text("§3Config"))
+        if (!player.hasPermission("polls.config")) {
+            configMeta.lore(listOf<Component>(Component.text("§cYou don't have permission to edit configuration")))
+        }
+        config.itemMeta = configMeta
+        setItem(13, config)
+
         val manage = ItemStack(Material.WRITTEN_BOOK, 1)
         val manageMeta = manage.itemMeta
         manageMeta.displayName(Component.text("§3Manage Polls"))
@@ -40,6 +49,16 @@ class MainPollGui(player: Player): Gui(Component.text("§8Polls Menu"), 27) {
 
                 GuiManager.open(ManagePollsGui(player), player)
             }
+
+            13 -> {
+                if (!player.hasPermission("polls.config")) {
+                    player.sendMessage("§cYou don't have permission to edit configuration")
+                    return
+                }
+
+                GuiManager.open(ConfigGui(), player)
+            }
+
             11 -> {
                 GuiManager.open(ViewPollsGui(player), player)
             }

@@ -22,13 +22,32 @@ object PollsManager {
     }
 
 
-    fun createPoll(question: String, options: List<String>, durationSeconds: Long) {
+//    fun createPoll(question: String, options: List<String>, durationSeconds: Long) {
+//        val endsAt = durationSeconds.let { LocalDateTime.now().plusSeconds(durationSeconds) }
+//
+//        val poll = Poll(
+//            id = nextId++,
+//            question = question,
+//            options = options.associateWith { 0 }.toMutableMap(),
+//            endsAt = endsAt,
+//        )
+//
+//        polls.add(poll)
+//    }
+
+    fun createPoll(
+        question: String,
+        options: List<String>,
+        durationSeconds: Long,
+        anonymous: Boolean
+    ) {
         val endsAt = durationSeconds.let { LocalDateTime.now().plusSeconds(durationSeconds) }
 
         val poll = Poll(
             id = nextId++,
             question = question,
             options = options.associateWith { 0 }.toMutableMap(),
+            anonymous = anonymous,
             endsAt = endsAt,
         )
 
@@ -71,19 +90,32 @@ object PollsManager {
 
 
     fun setPlayersAnswer(poll: Poll, player: Player, choice: String) {
-        poll.votes[player.uniqueId.toString()] = choice
-        calculateOptionsVotes(poll)
-    }
+        val uuid = player.uniqueId.toString()
 
-    private fun calculateOptionsVotes(poll: Poll) {
-        for (option in poll.options.keys) {
-            poll.options[option] = 0
+        // already voted
+        if (poll.votedPlayers.contains(uuid)) {
+            return
         }
 
-        for ((_, votedOption) in poll.votes) {
-            poll.options[votedOption] = poll.options.getOrDefault(votedOption, 0) + 1
+        poll.votedPlayers.add(uuid)
+
+        if (!poll.anonymous) {
+            poll.votes[uuid] = choice
         }
+
+        poll.options[choice] =
+            poll.options.getOrDefault(choice, 0) + 1
     }
+
+//    private fun calculateOptionsVotes(poll: Poll) {
+//        for (option in poll.options.keys) {
+//            poll.options[option] = 0
+//        }
+//
+//        for ((_, votedOption) in poll.votes) {
+//            poll.options[votedOption] = poll.options.getOrDefault(votedOption, 0) + 1
+//        }
+//    }
 
     fun getOptionWithMostVotes(poll: Poll): String {
         if (poll.options.isEmpty()) return "None"
