@@ -20,11 +20,13 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
     private var name = "Undefined"
     private val options = mutableListOf<String>()
     private var duration: Long = 0
+    private var anonymous = true
 
     init {
         updateNameItem()
         updateDurationItem()
         updateOptionsItem()
+        updateAnonymousItem()
 
         val create = ItemStack(Material.LIME_DYE)
         val createMeta = create.itemMeta
@@ -37,6 +39,8 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         cancelMeta.displayName(Component.text("§cCancel"))
         cancel.itemMeta = cancelMeta
         setItem(30, cancel)
+
+
     }
 
     private fun updateNameItem() {
@@ -45,7 +49,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         meta.displayName(Component.text("§6Poll Question"))
         meta.lore(listOf(Component.text("§7Current Question: "), Component.text("§5$name")))
         nameItem.itemMeta = meta
-        setItem(11, nameItem)
+        setItem(10, nameItem)
     }
 
     private fun updateDurationItem() {
@@ -55,7 +59,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         val durationText = if (duration <= 0) "Not set" else DurationParser.formatDuration(duration)
         meta.lore(listOf(Component.text("§7Current Duration: "), Component.text("§5$durationText")))
         durationItem.itemMeta = meta
-        setItem(15, durationItem)
+        setItem(14, durationItem)
     }
 
     private fun updateOptionsItem() {
@@ -68,7 +72,40 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         }
         meta.lore(lore)
         optionsItem.itemMeta = meta
-        setItem(13, optionsItem)
+        setItem(12, optionsItem)
+    }
+
+    private fun updateAnonymousItem() {
+        val material =
+            if (anonymous) Material.LIME_DYE
+            else Material.GRAY_DYE
+
+        val item = ItemStack(material)
+        val meta = item.itemMeta
+
+        meta.displayName(
+            Component.text(
+                if (anonymous)
+                    "§aAnonymous Poll"
+                else
+                    "§cPublic Poll"
+            )
+        )
+
+        meta.lore(
+            listOf(
+                Component.text(
+                    if (anonymous)
+                        "§7Votes are hidden"
+                    else
+                        "§7Votes are public"
+                )
+            )
+        )
+
+        item.itemMeta = meta
+
+        setItem(16, item)
     }
 
     override fun onClick(event: InventoryClickEvent) {
@@ -77,7 +114,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         val slot = event.slot
 
         when (slot) {
-            11 -> {
+            10 -> {
                 player.closeInventory()
                 PollChatListener.requestInput(player, PollChatListener.InputType.NAME) { input ->
                     Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
@@ -87,7 +124,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
                     })
                 }
             }
-            13 -> {
+            12 -> {
                 player.closeInventory()
                 PollChatListener.requestInput(player, PollChatListener.InputType.OPTION) { input ->
                     Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
@@ -97,7 +134,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
                     })
                 }
             }
-            15 -> {
+            14 -> {
                 player.closeInventory()
                 PollChatListener.requestInput(player, PollChatListener.InputType.DURATION) { input ->
                     Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
@@ -115,13 +152,24 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
                 }
 
             }
+            16 -> {
+                anonymous = !anonymous
+                updateAnonymousItem()
+            }
+
             30 -> {
                 player.closeInventory()
                 player.playSound(player.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
             }
             32 -> {
                 player.closeInventory()
-                PollsManager.createPoll(name, options, duration)
+//                PollsManager.createPoll(name, options, duration)
+                PollsManager.createPoll(
+                    name,
+                    options,
+                    duration,
+                    anonymous
+                )
                 Bukkit.broadcast(Component.text("§3------------------------------"))
                 val pollLine = Component.text("§3${name} ")
                     .append(
