@@ -78,6 +78,20 @@ class ManagePollGui(private val poll: Poll) :
         )
         add.itemMeta = addMeta
         setItem(6, add)
+
+        val playTime = ItemStack(Material.CLOCK)
+        val playTimeMeta = playTime.itemMeta
+        val message: String = if (poll.playTimeRequirements) {
+           "Disable"
+        } else "Enable"
+        playTimeMeta.displayName(Component.text("§a$message Play Time Requirements"))
+        playTimeMeta.persistentDataContainer.set(
+            SimplePolls.ACTION_KEY,
+            PersistentDataType.STRING,
+            "play_time"
+        )
+        playTime.itemMeta = playTimeMeta
+        setItem(8, playTime)
     }
 
     private fun setOptions() {
@@ -205,6 +219,11 @@ class ManagePollGui(private val poll: Poll) :
                         GuiManager.open(this, player)
                     })
                 }
+            }
+
+            "play_time" -> {
+                poll.playTimeRequirements = !poll.playTimeRequirements
+                draw()
             }
 
             "force_end" -> {

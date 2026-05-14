@@ -71,7 +71,7 @@ class ViewPollsGui(private val viewer: Player): Gui(Component.text("§8Viewing P
         }
 
         val continuousPlayTime = getContinuousPlayTime(player)
-        if (continuousPlayTime < poll.minimumUnlockTime) {
+        if (continuousPlayTime < poll.minimumUnlockTime && poll.playTimeRequirements) {
             lore.add(Component.text("§4You can vote in ${poll.minimumUnlockTime - continuousPlayTime}s"))
         }
 

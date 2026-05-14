@@ -165,7 +165,7 @@ object PollsManager {
     fun canVote(player: Player, poll: Poll): Boolean {
         val required = poll.minimumUnlockTime
 
-        if (required <= 0) return true
+        if (required <= 0 || !poll.playTimeRequirements) return true
 
         val playtimeSeconds =
             continuousPlayTime[player.uniqueId] ?: 0L
