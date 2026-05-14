@@ -3,6 +3,7 @@ package me.nickotato.simplePolls.guis
 import me.nickotato.simplePolls.SimplePolls
 import me.nickotato.simplePolls.managers.GuiManager
 import me.nickotato.simplePolls.managers.PollsManager
+import me.nickotato.simplePolls.managers.PollsManager.getContinuousPlayTime
 import me.nickotato.simplePolls.model.Poll
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -67,6 +68,11 @@ class ViewPollsGui(private val viewer: Player): Gui(Component.text("§8Viewing P
             lore.add(Component.text("§7Ends in §3${hoursLeft}h ${minutesLeft}m ${secondsLeft}s"))
         } else {
             lore.add(Component.text("§cExpired"))
+        }
+
+        val continuousPlayTime = getContinuousPlayTime(player)
+        if (continuousPlayTime < poll.minimumUnlockTime) {
+            lore.add(Component.text("§4You can vote in ${poll.minimumUnlockTime - continuousPlayTime}s"))
         }
 
 //        if (poll.votes.contains(player.uniqueId.toString())) {

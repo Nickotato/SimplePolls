@@ -165,4 +165,8 @@ object PollsManager {
 
         return playtimeSeconds >= required
     }
+
+    fun getContinuousPlayTime(player: Player): Long {
+        return continuousPlayTime[player.uniqueId] ?: 0
+    }
 }
