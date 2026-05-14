@@ -108,6 +108,13 @@ object PollsManager {
             continuousPlayTime[uuid] =
                 continuousPlayTime.getOrDefault(uuid, 0L) + 1L
         }
+
+    //Should consider not updating this constantly and instead store their login time and use it when needed, like this:
+//        @EventHandler
+//        fun onJoin(event: PlayerJoinEvent) {
+//            joinTimes[event.player.uniqueId] = System.currentTimeMillis()
+//        }
+
     }
 
     fun setPlayersAnswer(poll: Poll, player: Player, choice: String) {
@@ -168,5 +175,7 @@ object PollsManager {
 
     fun getContinuousPlayTime(player: Player): Long {
         return continuousPlayTime[player.uniqueId] ?: 0
+//        val x = player.getStatistic(Statistic.TOTAL_WORLD_TIME)
+//        player.lookAt <-- no clue this existed.
     }
 }
