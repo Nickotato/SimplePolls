@@ -29,6 +29,11 @@ class PlayerConnectionListener: Listener {
             player.sendMessage(message)
         }
 
+        val requiresPlaytime = PollsManager.polls.any { it.playTimeRequirements && it.minimumUnlockTime > 0 }
+
+        if (requiresPlaytime) {
+            player.sendMessage("§7Note: Leaving the server will reset your continuous playtime for active polls.")
+        }
 
         PollsManager.startSession(player.uniqueId)
     }

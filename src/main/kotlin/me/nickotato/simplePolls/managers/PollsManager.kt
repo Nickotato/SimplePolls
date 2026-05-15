@@ -147,7 +147,7 @@ object PollsManager {
         SessionDataStorage.saveSession(joinTimes)
     }
 
-    fun restoreSessions() {
+    fun restoreSessions(online: Collection<Player>) {
         val (shutdownTime, sessions) = SessionDataStorage.loadSessions()
 
         if (shutdownTime <= 0) return
@@ -156,6 +156,14 @@ object PollsManager {
 
         if (downtime <= SESSION_GRACE_MS) {
             joinTimes.putAll(sessions)
+        }
+
+//        if (downtime <= SESSION_GRACE_MS) {
+//            file.delete()
+//        }
+
+        online.forEach {
+            joinTimes.putIfAbsent(it.uniqueId, System.currentTimeMillis())
         }
     }
 }

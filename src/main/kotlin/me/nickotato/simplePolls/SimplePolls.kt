@@ -34,11 +34,7 @@ class SimplePolls : JavaPlugin() {
 
         PollsManager.beginRepeatingTasks()
 
-        PollsManager.restoreSessions()
-
-        Bukkit.getOnlinePlayers().forEach {
-            PollsManager.startSession(it.uniqueId)
-        }
+        PollsManager.restoreSessions(Bukkit.getOnlinePlayers())
     }
 
     override fun onDisable() {
