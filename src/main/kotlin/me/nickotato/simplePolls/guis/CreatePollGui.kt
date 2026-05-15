@@ -251,7 +251,3 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),5 * 9) {
     }
 
 }
-
-
-
-

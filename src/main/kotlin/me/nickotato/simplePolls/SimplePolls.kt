@@ -34,12 +34,15 @@ class SimplePolls : JavaPlugin() {
 
         PollsManager.beginRepeatingTasks()
 
+        PollsManager.restoreSessions()
+
         Bukkit.getOnlinePlayers().forEach {
-            PollsManager.addJoinTime(it.uniqueId, System.currentTimeMillis())
+            PollsManager.startSession(it.uniqueId)
         }
     }
 
     override fun onDisable() {
+        PollsManager.saveSessions()
         PollsManager.save()
     }
 }

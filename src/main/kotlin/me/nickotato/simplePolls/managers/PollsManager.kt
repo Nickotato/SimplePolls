@@ -2,6 +2,7 @@ package me.nickotato.simplePolls.managers
 
 import me.nickotato.simplePolls.SimplePolls
 import me.nickotato.simplePolls.data.PollDataStorage
+import me.nickotato.simplePolls.data.SessionDataStorage
 import me.nickotato.simplePolls.model.Poll
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
@@ -10,6 +11,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object PollsManager {
+
+    private const val SESSION_GRACE_MS = 5 * 60 * 1000L
+
     val polls = PollDataStorage.loadAllPolls()   //mutableListOf<Poll>()
     val expiredPolls = PollDataStorage.loadAllPolls(true)   //mutableListOf<Poll>()
     private val joinTimes = mutableMapOf<UUID, Long>()
@@ -131,11 +135,27 @@ object PollsManager {
 //        player.lookAt <-- no clue this existed.
     }
 
-    fun addJoinTime(uuid: UUID, joinTime: Long) {
-        joinTimes[uuid] = joinTime
+    fun startSession(uuid: UUID) {
+        joinTimes.putIfAbsent(uuid, System.currentTimeMillis())
     }
 
     fun removeJoinTime(uuid: UUID) {
         joinTimes.remove(uuid)
+    }
+
+    fun saveSessions() {
+        SessionDataStorage.saveSession(joinTimes)
+    }
+
+    fun restoreSessions() {
+        val (shutdownTime, sessions) = SessionDataStorage.loadSessions()
+
+        if (shutdownTime <= 0) return
+
+        val downtime = System.currentTimeMillis() - shutdownTime
+
+        if (downtime <= SESSION_GRACE_MS) {
+            joinTimes.putAll(sessions)
+        }
     }
 }

@@ -30,7 +30,7 @@ class PlayerConnectionListener: Listener {
         }
 
 
-        PollsManager.addJoinTime(player.uniqueId, System.currentTimeMillis())
+        PollsManager.startSession(player.uniqueId)
     }
 
     @EventHandler
