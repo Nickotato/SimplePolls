@@ -6,9 +6,9 @@ import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
-class PlayerJoinListener : Listener {
-
+class PlayerConnectionListener: Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
@@ -28,5 +28,13 @@ class PlayerJoinListener : Listener {
                 .append(Component.text("§7to vote."))
             player.sendMessage(message)
         }
+
+
+        PollsManager.addJoinTime(player.uniqueId, System.currentTimeMillis())
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        PollsManager.removeJoinTime(event.player.uniqueId)
     }
 }

@@ -1,10 +1,11 @@
 package me.nickotato.simplePolls
 
 import me.nickotato.simplePolls.commands.PollCommand
-import me.nickotato.simplePolls.listeners.PlayerJoinListener
+import me.nickotato.simplePolls.listeners.PlayerConnectionListener
 import me.nickotato.simplePolls.listeners.PollChatListener
 import me.nickotato.simplePolls.managers.GuiManager
 import me.nickotato.simplePolls.managers.PollsManager
+import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -26,11 +27,16 @@ class SimplePolls : JavaPlugin() {
 
         server.pluginManager.registerEvents(GuiManager, this)
         server.pluginManager.registerEvents(PollChatListener, this)
-        server.pluginManager.registerEvents(PlayerJoinListener(), this)
+//        server.pluginManager.registerEvents(PlayerJoinListener(), this)
+        server.pluginManager.registerEvents(PlayerConnectionListener(), this)
 
         getCommand("poll")?.setExecutor(PollCommand())
 
         PollsManager.beginRepeatingTasks()
+
+        Bukkit.getOnlinePlayers().forEach {
+            PollsManager.addJoinTime(it.uniqueId, System.currentTimeMillis())
+        }
     }
 
     override fun onDisable() {

@@ -3,7 +3,6 @@ package me.nickotato.simplePolls.managers
 import me.nickotato.simplePolls.SimplePolls
 import me.nickotato.simplePolls.data.PollDataStorage
 import me.nickotato.simplePolls.model.Poll
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
@@ -13,8 +12,7 @@ import java.util.UUID
 object PollsManager {
     val polls = PollDataStorage.loadAllPolls()   //mutableListOf<Poll>()
     val expiredPolls = PollDataStorage.loadAllPolls(true)   //mutableListOf<Poll>()
-
-    val continuousPlayTime = mutableMapOf<UUID, Long>()
+    private val joinTimes = mutableMapOf<UUID, Long>()
 
     private var nextId = 1
 
@@ -24,20 +22,6 @@ object PollsManager {
 
         nextId = maxOf(highestActive, highestExpired) + 1
     }
-
-
-//    fun createPoll(question: String, options: List<String>, durationSeconds: Long) {
-//        val endsAt = durationSeconds.let { LocalDateTime.now().plusSeconds(durationSeconds) }
-//
-//        val poll = Poll(
-//            id = nextId++,
-//            question = question,
-//            options = options.associateWith { 0 }.toMutableMap(),
-//            endsAt = endsAt,
-//        )
-//
-//        polls.add(poll)
-//    }
 
     fun createPoll(
         question: String,
@@ -64,7 +48,6 @@ object PollsManager {
         object : BukkitRunnable() {
             override fun run() {
                 checkIfPollsExpired()
-                updatePlayerContinuousTime()
             }
         }.runTaskTimer(SimplePolls.instance, 0L, 20L)
 
@@ -95,28 +78,6 @@ object PollsManager {
         }
     }
 
-    private fun updatePlayerContinuousTime() {
-
-        val onlinePlayers = Bukkit.getOnlinePlayers()
-        val onlineUUIDs = onlinePlayers.map { it.uniqueId }.toSet()
-
-        continuousPlayTime.keys.removeIf { it !in onlineUUIDs }
-
-        for (player in onlinePlayers) {
-            val uuid = player.uniqueId
-
-            continuousPlayTime[uuid] =
-                continuousPlayTime.getOrDefault(uuid, 0L) + 1L
-        }
-
-    //Should consider not updating this constantly and instead store their login time and use it when needed, like this:
-//        @EventHandler
-//        fun onJoin(event: PlayerJoinEvent) {
-//            joinTimes[event.player.uniqueId] = System.currentTimeMillis()
-//        }
-
-    }
-
     fun setPlayersAnswer(poll: Poll, player: Player, choice: String) {
         val uuid = player.uniqueId.toString()
 
@@ -140,16 +101,6 @@ object PollsManager {
             poll.options.getOrDefault(choice, 0) + 1
     }
 
-//    private fun calculateOptionsVotes(poll: Poll) {
-//        for (option in poll.options.keys) {
-//            poll.options[option] = 0
-//        }
-//
-//        for ((_, votedOption) in poll.votes) {
-//            poll.options[votedOption] = poll.options.getOrDefault(votedOption, 0) + 1
-//        }
-//    }
-
     fun getOptionWithMostVotes(poll: Poll): String {
         if (poll.options.isEmpty()) return "None"
 
@@ -167,15 +118,24 @@ object PollsManager {
 
         if (required <= 0 || !poll.playTimeRequirements) return true
 
-        val playtimeSeconds =
-            continuousPlayTime[player.uniqueId] ?: 0L
-
-        return playtimeSeconds >= required
+        return getContinuousPlayTime(player) >= required
     }
 
     fun getContinuousPlayTime(player: Player): Long {
-        return continuousPlayTime[player.uniqueId] ?: 0
+//        return continuousPlayTime[player.uniqueId] ?: 0
+
+        val joinedAt = joinTimes[player.uniqueId] ?: return 0L
+        return (System.currentTimeMillis() - joinedAt) / 1000
+
 //        val x = player.getStatistic(Statistic.TOTAL_WORLD_TIME)
 //        player.lookAt <-- no clue this existed.
+    }
+
+    fun addJoinTime(uuid: UUID, joinTime: Long) {
+        joinTimes[uuid] = joinTime
+    }
+
+    fun removeJoinTime(uuid: UUID) {
+        joinTimes.remove(uuid)
     }
 }
