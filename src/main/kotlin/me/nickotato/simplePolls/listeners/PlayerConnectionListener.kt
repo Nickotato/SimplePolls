@@ -6,9 +6,9 @@ import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
-class PlayerJoinListener : Listener {
-
+class PlayerConnectionListener: Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
@@ -28,5 +28,18 @@ class PlayerJoinListener : Listener {
                 .append(Component.text("§7to vote."))
             player.sendMessage(message)
         }
+
+        val requiresPlaytime = PollsManager.polls.any { it.playTimeRequirements && it.minimumUnlockTime > 0 }
+
+        if (requiresPlaytime) {
+            player.sendMessage("§7Note: Leaving the server will reset your continuous playtime for active polls.")
+        }
+
+        PollsManager.startSession(player.uniqueId)
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        PollsManager.removeJoinTime(event.player.uniqueId)
     }
 }

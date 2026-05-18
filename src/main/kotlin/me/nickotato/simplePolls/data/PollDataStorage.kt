@@ -30,6 +30,7 @@ object PollDataStorage {
         config.set("endsAt", poll.endsAt.toString())
         config.set("anonymous", poll.anonymous)
         config.set("votedPlayers", poll.votedPlayers.toList())
+        config.set("minimumUnlockTime", poll.minimumUnlockTime)
 
         if (!poll.anonymous) {
             config.createSection("votes", poll.votes)
@@ -78,6 +79,7 @@ object PollDataStorage {
         val votedPlayers =
             config.getStringList("votedPlayers").toMutableSet()
 
+        val minimumUnlockTime = config.getLong("minimumUnlockTime")
 
 
         return Poll(
@@ -88,7 +90,8 @@ object PollDataStorage {
             votedPlayers = votedPlayers,
             anonymous = anonymous,
             createdAt = createdAt,
-            endsAt = endsAt
+            endsAt = endsAt,
+            minimumUnlockTime = minimumUnlockTime
         )
     }
 

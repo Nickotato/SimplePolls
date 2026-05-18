@@ -6,8 +6,6 @@ import me.nickotato.simplePolls.managers.GuiManager
 import me.nickotato.simplePolls.managers.PollsManager
 import me.nickotato.simplePolls.utils.DurationParser
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.event.HoverEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -15,30 +13,43 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 
-class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
+class CreatePollGui:Gui(Component.text("§8Creating Poll"),5 * 9) {
     private val gui = this
     private var name = "Undefined"
     private val options = mutableListOf<String>()
     private var duration: Long = 0
     private var anonymous = true
+    private var minimumContinuousUnlockTime: Long = 0
+
+    companion object {
+        private const val SLOT_NAME = 10
+        private const val SLOT_OPTIONS = 12
+        private const val SLOT_DURATION = 14
+        private const val SLOT_ANONYMOUS = 16
+        private const val SLOT_UNLOCK_TIME = 19
+
+        private const val SLOT_CANCEL = 30
+        private const val SLOT_CREATE = 32
+    }
 
     init {
         updateNameItem()
         updateDurationItem()
         updateOptionsItem()
         updateAnonymousItem()
+        updateUnlockTimeItem()
 
         val create = ItemStack(Material.LIME_DYE)
         val createMeta = create.itemMeta
         createMeta.displayName(Component.text("§2Create Poll"))
         create.itemMeta = createMeta
-        setItem(32, create)
+        setItem(SLOT_CREATE, create)
 
         val cancel = ItemStack(Material.RED_DYE)
         val cancelMeta = cancel.itemMeta
         cancelMeta.displayName(Component.text("§cCancel"))
         cancel.itemMeta = cancelMeta
-        setItem(30, cancel)
+        setItem(SLOT_CANCEL, cancel)
 
 
     }
@@ -49,7 +60,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         meta.displayName(Component.text("§6Poll Question"))
         meta.lore(listOf(Component.text("§7Current Question: "), Component.text("§5$name")))
         nameItem.itemMeta = meta
-        setItem(10, nameItem)
+        setItem(SLOT_NAME, nameItem)
     }
 
     private fun updateDurationItem() {
@@ -59,7 +70,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         val durationText = if (duration <= 0) "Not set" else DurationParser.formatDuration(duration)
         meta.lore(listOf(Component.text("§7Current Duration: "), Component.text("§5$durationText")))
         durationItem.itemMeta = meta
-        setItem(14, durationItem)
+        setItem(SLOT_DURATION, durationItem)
     }
 
     private fun updateOptionsItem() {
@@ -72,7 +83,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         }
         meta.lore(lore)
         optionsItem.itemMeta = meta
-        setItem(12, optionsItem)
+        setItem(SLOT_OPTIONS, optionsItem)
     }
 
     private fun updateAnonymousItem() {
@@ -105,7 +116,33 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
 
         item.itemMeta = meta
 
-        setItem(16, item)
+        setItem(SLOT_ANONYMOUS, item)
+    }
+
+    private fun updateUnlockTimeItem() {
+        val unlockTimeItem = ItemStack(Material.CLOCK, 1)
+        val meta = unlockTimeItem.itemMeta
+
+        meta.displayName(
+            Component.text("§6Minimum Continuous Playtime")
+        )
+
+        val unlockTimeText =
+            if (minimumContinuousUnlockTime <= 0)
+                "Not set"
+            else
+                DurationParser.formatDuration(minimumContinuousUnlockTime)
+
+        meta.lore(
+            listOf(
+                Component.text("§7Required continuous playtime:"),
+                Component.text("§5$unlockTimeText")
+            )
+        )
+
+        unlockTimeItem.itemMeta = meta
+
+        setItem(SLOT_UNLOCK_TIME, unlockTimeItem)
     }
 
     override fun onClick(event: InventoryClickEvent) {
@@ -114,7 +151,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
         val slot = event.slot
 
         when (slot) {
-            10 -> {
+            SLOT_NAME -> {
                 player.closeInventory()
                 PollChatListener.requestInput(player, PollChatListener.InputType.NAME) { input ->
                     Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
@@ -124,7 +161,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
                     })
                 }
             }
-            12 -> {
+            SLOT_OPTIONS -> {
                 player.closeInventory()
                 PollChatListener.requestInput(player, PollChatListener.InputType.OPTION) { input ->
                     Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
@@ -134,7 +171,7 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
                     })
                 }
             }
-            14 -> {
+            SLOT_DURATION -> {
                 player.closeInventory()
                 PollChatListener.requestInput(player, PollChatListener.InputType.DURATION) { input ->
                     Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
@@ -152,41 +189,54 @@ class CreatePollGui:Gui(Component.text("§8Creating Poll"),4 * 9) {
                 }
 
             }
-            16 -> {
+            SLOT_ANONYMOUS -> {
                 anonymous = !anonymous
                 updateAnonymousItem()
             }
 
-            30 -> {
+            SLOT_UNLOCK_TIME -> {
+                player.closeInventory()
+
+                PollChatListener.requestInput(
+                    player,
+                    PollChatListener.InputType.DURATION
+                ) { input ->
+
+                    Bukkit.getScheduler().runTask(SimplePolls.instance, Runnable {
+
+                        val parsed = try {
+                            DurationParser.parseDuration(input)
+                        } catch (e: IllegalArgumentException) {
+                            player.sendMessage("§c${e.message}")
+                            return@Runnable
+                        }
+
+                        minimumContinuousUnlockTime = parsed
+
+                        updateUnlockTimeItem()
+                        GuiManager.open(gui, player)
+                    })
+                }
+            }
+
+            SLOT_CANCEL -> {
                 player.closeInventory()
                 player.playSound(player.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
             }
-            32 -> {
+            SLOT_CREATE -> {
                 player.closeInventory()
 //                PollsManager.createPoll(name, options, duration)
                 PollsManager.createPoll(
                     name,
                     options,
                     duration,
-                    anonymous
+                    anonymous,
+                    minimumContinuousUnlockTime
                 )
-                Bukkit.broadcast(Component.text("§3------------------------------"))
-                val pollLine = Component.text("§3${name} ")
-                    .append(
-                        Component.text("§b/poll")
-                            .clickEvent(ClickEvent.runCommand("/poll"))
-                            .hoverEvent(HoverEvent.showText(Component.text("§7Click to vote")))
-                    )
-                    .append(Component.text("§3 to vote!"))
-                Bukkit.broadcast(pollLine)
-                Bukkit.broadcast(Component.text("§3------------------------------"))
+
                 player.playSound(player.location, Sound.ENTITY_VILLAGER_YES, 1f, 1f)
             }
         }
     }
 
 }
-
-
-
-

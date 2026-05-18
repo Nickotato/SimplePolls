@@ -10,5 +10,7 @@ data class Poll(
     var endsAt: LocalDateTime,
     val votes: MutableMap<String, String> = mutableMapOf(), //Player UUID, Option they voted for.
     val anonymous: Boolean = false,
-    val votedPlayers: MutableSet<String> = mutableSetOf()
+    val votedPlayers: MutableSet<String> = mutableSetOf(),
+    val minimumUnlockTime: Long = 0,
+    var playTimeRequirements: Boolean = true,
 )

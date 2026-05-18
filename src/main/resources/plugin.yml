@@ -1,5 +1,5 @@
 name: SimplePolls
-version: '1.0-SNAPSHOT'
+version: '1.3-SNAPSHOT'
 main: me.nickotato.simplePolls.SimplePolls
 api-version: '1.21'
 commands:
