@@ -68,8 +68,17 @@ class ViewExpiredPollsGui: Gui(Component.text("§8Viewing Expired Polls"),54) {
         return viewablePolls
     }
 
+    private fun hasNextPage(): Boolean {
+        return PollsManager.expiredPolls.size > page * 45
+    }
+
+    private fun hasPreviousPage(): Boolean {
+        return page > 1
+    }
+
     private fun buildNavigationItems() {
         val default = ItemStack(Material.ARROW)
+
         val next = default.clone()
         val nextMeta = next.itemMeta
         nextMeta.displayName(Component.text("Next Page"))
@@ -80,10 +89,17 @@ class ViewExpiredPollsGui: Gui(Component.text("§8Viewing Expired Polls"),54) {
         previousMeta.displayName(Component.text("Previous Page"))
         previous.itemMeta = previousMeta
 
+        if (hasPreviousPage()) {
+            setItem(45, previous)
+        } else {
+            setItem(45, ItemStack(Material.AIR))
+        }
 
-        if (page > 1) setItem(45, previous)
-        val viewableLast = getViewablePolls().lastOrNull() ?: return
-        if (viewableLast != PollsManager.expiredPolls.last()) setItem(53, next)
+        if (hasNextPage()) {
+            setItem(53, next)
+        } else {
+            setItem(53, ItemStack(Material.AIR))
+        }
     }
 
     override fun onClick(event: InventoryClickEvent) {
@@ -94,12 +110,16 @@ class ViewExpiredPollsGui: Gui(Component.text("§8Viewing Expired Polls"),54) {
 
         when (slot) {
             45 -> {
-                page--
-                buildPage()
+                if (hasPreviousPage()) {
+                    page--
+                    buildPage()
+                }
             }
             53 -> {
-                page++
-                buildPage()
+                if (hasNextPage()) {
+                    page++
+                    buildPage()
+                }
             }
         }
 
