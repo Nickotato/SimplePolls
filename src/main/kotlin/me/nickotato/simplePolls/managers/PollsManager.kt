@@ -3,7 +3,10 @@ package me.nickotato.simplePolls.managers
 import me.nickotato.simplePolls.SimplePolls
 import me.nickotato.simplePolls.data.PollDataStorage
 import me.nickotato.simplePolls.data.SessionDataStorage
+import me.nickotato.simplePolls.events.PollCreatedEvent
+import me.nickotato.simplePolls.events.PollFinishedEvent
 import me.nickotato.simplePolls.model.Poll
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
@@ -46,6 +49,8 @@ object PollsManager {
         )
 
         polls.add(poll)
+
+        Bukkit.getPluginManager().callEvent(PollCreatedEvent(poll))
     }
 
     fun beginRepeatingTasks() {
@@ -70,16 +75,20 @@ object PollsManager {
         while (iterator.hasNext()) {
             val poll = iterator.next()
 
-            if (poll.endsAt.isBefore(now)) {
-
-                expiredPolls.add(poll)
-
-                iterator.remove()
-
-                val file = File(SimplePolls.instance.dataFolder, "polldata/${poll.id}.yml")
-                if (file.exists()) file.delete()
-            }
+            if (poll.endsAt.isBefore(now)) handleExpiredPolls(iterator, poll)
         }
+    }
+
+    private fun handleExpiredPolls(iterator: MutableIterator<Poll>, poll: Poll) {
+        expiredPolls.add(poll)
+        iterator.remove()
+        deletePollFile(poll)
+        Bukkit.getPluginManager().callEvent(PollFinishedEvent(poll))
+    }
+
+    private fun deletePollFile(poll: Poll) {
+        val file = File(SimplePolls.instance.dataFolder, "polldata/${poll.id}.yml")
+        if (file.exists()) file.delete()
     }
 
     fun setPlayersAnswer(poll: Poll, player: Player, choice: String) {

@@ -3,6 +3,7 @@ package me.nickotato.simplePolls
 import me.nickotato.simplePolls.commands.PollCommand
 import me.nickotato.simplePolls.listeners.PlayerConnectionListener
 import me.nickotato.simplePolls.listeners.PollChatListener
+import me.nickotato.simplePolls.listeners.PollListener
 import me.nickotato.simplePolls.managers.GuiManager
 import me.nickotato.simplePolls.managers.PollsManager
 import org.bukkit.Bukkit
@@ -27,8 +28,8 @@ class SimplePolls : JavaPlugin() {
 
         server.pluginManager.registerEvents(GuiManager, this)
         server.pluginManager.registerEvents(PollChatListener, this)
-//        server.pluginManager.registerEvents(PlayerJoinListener(), this)
         server.pluginManager.registerEvents(PlayerConnectionListener(), this)
+        server.pluginManager.registerEvents(PollListener(), this)
 
         getCommand("poll")?.setExecutor(PollCommand())
 
